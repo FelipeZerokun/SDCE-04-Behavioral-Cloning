@@ -129,6 +129,7 @@ To capture good driving behavior, I used the next approaches:
 * One lap in the advanced track (small recordings of parts with lots of curves)
 
 Here are examples of the three cameras in the standard track:
+
 ![alt text][image3]
 ![alt text][image4]
 ![alt text][image5]

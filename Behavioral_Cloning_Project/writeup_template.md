@@ -16,12 +16,19 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./template_images/nvidia_cnn_architecture.png "Nvidia Architecture"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image2]: ./template_images/nn_architecture.png "my CovNet Architecture"
+[image3]: ./template_images/center_cam_example.png "Center Cam example"
+[image4]: ./template_images/left_cam_example.png "Left Cam example"
+[image5]: ./template_images/right_cam_example.png "Right Cam Example"
+[image6]: ./template_images/side_to_center_recover_01.jpg "Center Correction 01"
+[image7]: ./template_images/side_to_center_recover_03.jpg "Center Correction 03"
+[image8]: ./template_images/side_to_center_recover_05.jpg "Center Correction 05"
+[image9]: ./template_images/side_to_center_recover_08.jpg "Center Correction 08"
+[image10]: ./template_images/side_to_center_recover_10.jpg "Center Correction 10"
+
+
+[image11]: ./template_images/unflip_right_image.png "Right cam image unflipped"
+[image12]: ./template_images/flip_right_image.png "Right cam image flipped"
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -75,10 +82,12 @@ As recommended, I did 2 full laps counter-clock wise, 2 full laps clock wise and
 
 #### 1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to try different architectures, going from small ones to bigger ones, to see which one gave me better results. At the beginning, I just added a couple of layers to see how the training went, and the tried different configurations fo the Nvidia architecture.
+The overall strategy for deriving a model architecture was to try different architectures, going from small ones to bigger ones, to see which one gave me better results. At the beginning, I just added a couple of layers to see how the training went, and then tried different configurations fo the Nvidia architecture.
 
 My first step was to use add some layers to experiments and see how could I reduce the loss values with different parameters. or if I needed better training data. 
 After some exploration, I decided to try a convolution neural network model similar to the Nvidia Architecture in the paper "End to End Learning for Self-Driving Cars"  I thought this model might be appropriate because it was build for a similar task with good results.
+
+![alt text][image1]
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set in a 0.8 / 0.2 ratio. 
 Firstly, my model performed poorly in both the training and validation set, so I added more convolutions. After some testing, I used 5 convolution layers, as in the Nvidia architecture and added more epochs to combat underfitting. Then, I used the Nvidia architecture and tested again. This time I found that the training set had low loss, but the validation set was not so good. Here, I added the Dropout layers between the fully connected layers. 
@@ -88,36 +97,56 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 #### 2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (model_creation.py lines 98-113) consisted of a convolution neural network with the following layers and layer sizes:
+# First, 5 Convolution layers
+* Convolution layer with 24 filters, and a filter size of (5,5) with Rectified Linear unit activation ('relu')
+* Convolution layer with 36 filters, and a filter size of (5,5) with Rectified Linear unit activation ('relu')
+* Convolution layer with 48 filters, and a filter size of (5,5) with Rectified Linear unit activation ('relu')
+* Convolution layer with 64 filters, and a filter size of (3,3) with Rectified Linear unit activation ('relu')
+* Convolution layer with 64 filters, and a filter size of (3,3) with Rectified Linear unit activation ('relu')
+# Four Fully connected layers
+* Flatten the output of the last convolution layer
+* Dense with 1164 units
+* Dropout layer with 50% dropout
+* Dense with 100 units
+* Dropout layer with 50% dropout
+* Dense with 50 units
+* Dropout layer with 50% dropout
+* Dense with 10 units
+* Dropout layer with 50% dropout
+* final layer with one output (the steering angle)
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
-![alt text][image1]
+![alt text][image2]
 
 #### 3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+To capture good driving behavior, I used the next approaches:
+* Two laps counter-clock wise (the spawn direction of the car)
+* Two laps clock wise (turn around the car and drove two laps)
+* one lap with side to center correction (small recordings of how the car should behave when going near the edge of the road)
+* One lap in the advanced track (small recordings of parts with lots of curves)
 
-![alt text][image2]
-
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
-
+Here are examples of the three cameras in the standard track:
 ![alt text][image3]
 ![alt text][image4]
 ![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
-
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recover in that kind of situations. Here is one example of the car recovering from the left side of the lane back to the center.
 
 ![alt text][image6]
 ![alt text][image7]
+![alt text][image8]
+![alt text][image9]
+![alt text][image10]
 
-Etc ....
+To augment the data sat, I also flipped images and angles thinking that this would help the model learn how to turn to both directions. For example, the previous images show how to correct from the left side of the lane back to center. By flipping the image, I also get an example of how to correct from the right side of the lane back to center. Here is an example of a image, and the flipped image
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+![alt text][image11]
+![alt text][image12]
 
+This process gave me a total of  6783  images for each camera. A total of 20349 images. With the flipping proccess I ended with a dataset size of 40698
+I finally randomly shuffled the data set and put 32558 elements into the training set and 8140 into the validation set. (80%/20% rule of thumb)
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. In the beginning I was training the dataset in my computer, but had trouble with the tensorflow. I switch to the Udacity working space and used fewer epochs than before, I ended with 2 epochs, but my initial training was with 5 epochs. I used an adam optimizer so that manually training the learning rate wasn't necessary.

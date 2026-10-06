@@ -1,20 +1,13 @@
-# Python
+# Local Python environment and caches
 .venv/
 __pycache__/
-*.py[cod]
-*.egg-info/
-build/
-dist/
-
-# Development tools
+*.pyc
 .pytest_cache/
-.mypy_cache/
 .ruff_cache/
-.coverage
-htmlcov/
+.mypy_cache/
 
-# Local datasets, simulator, and generated artifacts
+# Local reference, recordings, simulator, and generated files
+/legacy/
 /data/raw/
-/data/processed/
-/simulators/
 /outputs/
+/simulators/

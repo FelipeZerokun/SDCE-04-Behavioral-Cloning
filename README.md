@@ -77,4 +77,9 @@ Raw recordings are excluded from Git.
 
 ## Legacy project and attribution
 
+The original `drive.py` and `video.py` scripts are preserved in
+[`references/udacity/`](references/udacity/README.md), along with their
+Udacity MIT license. They provide references for simulator communication
+and video generation as the modern pipeline is built.
+
 ## License

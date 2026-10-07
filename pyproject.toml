@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Behavioral cloning in the Udacity simulator"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "opencv-python>=5.0.0.93",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -16,6 +18,7 @@ packages = ["src/behavioral_cloning"]
 [tool.ruff]
 target-version = "py312"
 line-length = 88
+extend-exclude = ["references/udacity"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

@@ -13,9 +13,15 @@ that can be run as Python modules.
 implemented. Training and simulator inference are not yet implemented.
 
 **Next milestone:** Prepare training and validation data, then build and
-train a baseline steering-prediction network. PyTorch was the initial plan;
-the framework choice is pending confirmation because the Udacity instructions
-specify Keras and a `model.h5` artifact.
+train a baseline steering-prediction network using modern Keras, following Udacity's
+model-loading workflow and targeting a full-model `model.h5` export. The goal
+is to modernize project structure, testing, and data preparation while keeping
+changes to the original driving script minimal.
+
+The active development branch is `modern/keras`. Keras and its execution
+backend will be configured when training is introduced; they are not yet
+installed as project dependencies. We plan to retain a native `.keras` model
+for development and verify a full-model `.h5` export for Udacity compatibility.
 
 ## Features
 
@@ -183,8 +189,9 @@ uv.lock                 # Dependency lockfile
 - Missing or unreadable images stop the viewer with an error. Camera images must
   have matching heights and compatible types for horizontal concatenation.
 - Training, augmentation, model saving, and simulator integration remain planned.
-- A PyTorch model would require adapting the legacy Keras driving integration;
-  the final framework and saved-model format have not yet been selected.
+- Keras is the selected training API. Compatibility between the exported model,
+  modern dependencies, and the legacy driving script still needs verification;
+  using `.h5` alone does not guarantee the old script will run unchanged.
 
 ## Legacy project and attribution
 

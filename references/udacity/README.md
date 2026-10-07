@@ -10,7 +10,7 @@ archive. Their earlier tracked versions are in commit `0a6681d` under
 - `video.py`: reference for turning recorded frames into an MP4 video.
 - `LICENSE`: the accompanying Udacity MIT license.
 
-These are historical reference scripts, not part of the modern PyTorch
+These are historical reference scripts, not part of the modern Keras
 package. They use legacy Keras, Socket.IO, Eventlet, and MoviePy APIs;
 their dependencies are not installed by the current project configuration.
 We will consult and adapt them as we implement driving and video export.

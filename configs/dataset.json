@@ -1,0 +1,5 @@
+{
+  "train": ["normal_lap_01", "inverse_lap_01", "recover_left", "recover_right", "sharp_curve_left", "sharp_curve_right", "slight_curve_left", "slight_curve_right", "bridge"],
+  "validation": ["normal_lap_02", "inverse_lap_02"],
+  "exclusions": []
+}

@@ -59,7 +59,7 @@ def render_sample(sample: DrivingSample, index: int, total: int):
 
 
 if __name__ == "__main__":
-    csv_path = Path("data/raw/normal_lap_01/driving_log.csv")
+    csv_path = Path("data/raw/recover_left/driving_log.csv")
     samples = load_session(csv_path)
     index = 0
     window_name = "Left | Center | Right"

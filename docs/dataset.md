@@ -1,7 +1,8 @@
 # Dataset preparation
 
-The 2026-10-08 milestone uses individual center-camera images and recorded
-steering targets. No CNN is implemented. Collection history and session purposes
+The dataset milestone completed on 2026-10-08 uses individual center-camera images
+and recorded steering targets. A CNN training pipeline was implemented and
+smoke-tested on 2026-10-09; see [training](training.md). Collection history and session purposes
 are in the [README](../README.md). The recorder confirmed visual quality with no
 exclusions. Raw recordings remain unchanged.
 
@@ -98,7 +99,7 @@ tracks or dedicated recovery performance. Autonomous driving still needs testing
 
 ## Baseline preprocessing contract
 
-Use this conservative starting plan when implementing the future Keras pipeline:
+The implemented Keras baseline follows this contract:
 
 | Property | Decision |
 | --- | --- |
@@ -115,15 +116,19 @@ Use this conservative starting plan when implementing the future Keras pipeline:
 Keeping native framing avoids committing to a crop before evaluating its effect
 on road visibility. Cropping and downsampling remain possible later experiments;
 the full image costs more computation and includes irrelevant scenery/hood.
-The preprocessing function itself will be implemented with the training pipeline.
-Training and simulator inference must call the same preparation logic, with the
-decoder's input color order explicit. No additional normalization should then
-occur inside the model. Persist this contract alongside each future model.
+`preprocessing.py` implements decoding, BGR-to-RGB conversion and normalization.
+Training calls this preparation logic, and future simulator inference must reuse
+it with the decoder's input color order explicit. The function accepts BGR input;
+an RGB simulator decoder would need an explicit adapter before calling it.
+No additional normalization occurs inside the model. Each training run persists
+this contract in `config.json` alongside the model.
 
 ## Verification
 
-Seven tests passed, covering the original loader plus malformed rows, missing and
+The original seven dataset tests passed, covering the loader plus malformed rows, missing and
 nonfinite labels, corrupt/missing images, range errors, auxiliary warnings,
 exclusions, empty sessions, split overlap, deterministic outputs, duplicate
 detection, and distribution boundaries. Ruff and strict mypy passed for the new
-validation module. These checks do not imply a model has been trained or evaluated.
+validation module. The complete suite now has 18 passing tests, including the
+training pipeline. The real-data smoke run re-audited all 8,704 examples
+successfully; full training and held-out baseline assessment remain outstanding.

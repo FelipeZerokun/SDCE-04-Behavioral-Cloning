@@ -11,17 +11,16 @@ that can be run as Python modules.
 
 **Status:** Dataset loading, the interactive viewer, and dataset validation with
 reproducible split manifests are implemented. All 8,704 current center-image
-examples passed the audit. Training and simulator inference are not implemented.
-See [dataset preparation](docs/dataset.md) for results and the preprocessing plan.
+examples passed the audit. Training and offline evaluation are implemented and
+smoke-tested. Full baseline training and simulator inference remain outstanding.
+See [dataset preparation](docs/dataset.md) for results and the preprocessing contract.
 
-**Next milestone:** Build a single-image steering baseline using modern Keras,
-the agreed dataset split, and the documented preprocessing plan, targeting a
-full-model `model.h5` export for Udacity's model-loading workflow.
+**Next milestone:** Run full baseline training and assess held-out steering
+predictions. See [training instructions](docs/training.md).
 
-The active development branch is `modern/keras`. Keras and its execution
-backend will be configured when training is introduced; they are not yet
-installed as project dependencies. We plan to retain a native `.keras` model
-for development and verify a full-model `.h5` export for Udacity compatibility.
+The active development branch is `modern/keras`. Keras and TensorFlow are locked
+project dependencies. The pipeline saves native `.keras` and full-model `.h5`
+files and verifies their predictions after reload in the current environment.
 
 ## Features
 
@@ -34,19 +33,23 @@ for development and verify a full-model `.h5` export for Udacity compatibility.
 - Test CSV reading, image-path resolution, and row parsing using synthetic data.
 - Audit center-image examples and generate reproducible session split manifests
   with steering summaries and exact image-file duplicate checks.
+- Prepare RGB float32 images and load batches from audited manifests.
+- Train a Keras CNN with early stopping and best-checkpoint selection.
+- Export and reload-check `.keras` and `.h5` models, and generate validation
+  metrics, prediction records, loss curves, and example error plots.
 
 ## Training and driving pipeline
 
-The planned training input is a center-camera image; the target is its
-recorded steering angle. Throttle is displayed for inspection but is not
+The training input is a center-camera image; the target is its
+recorded steering command. Throttle is displayed for inspection but is not
 a training target. Each example uses one image, not a sequence of images.
 Side-camera inputs and corrected steering labels are deferred.
 
 1. Collect recordings and inspect them with the viewer (available).
 2. Assign entire sessions to training and validation sets before augmentation
    to reduce leakage between similar neighboring frames (implemented).
-3. Implement the documented preprocessing plan and build a baseline network (planned).
-4. Compare training and validation mean squared error (planned).
+3. Apply the documented preprocessing and train a baseline network (implemented).
+4. Compare training and validation mean squared error (implemented).
 5. Connect the model to the simulator and evaluate autonomous driving (planned).
 
 A low validation error alone does not establish successful driving; the
@@ -224,11 +227,17 @@ selected sample changes.
 
 ### Train a model
 
-Not implemented yet; this is the next development milestone after data preparation.
+```powershell
+uv run python -m behavioral_cloning.train --output-dir outputs/baseline-01
+```
+
+See [training instructions](docs/training.md) for smoke mode, settings and outputs.
 
 ### Evaluate a model
 
-Not implemented yet.
+```powershell
+uv run python -m behavioral_cloning.evaluate outputs/baseline-01/model.keras --manifest outputs/baseline-01/dataset/validation.csv
+```
 
 ### Drive in the simulator
 
@@ -241,23 +250,26 @@ references, not the current package's inference implementation.
 `uv.lock` records resolved dependencies. Viewer and loader session paths are
 configured directly in their executable blocks. The validation command accepts
 CLI paths and uses `configs/dataset.json` for split assignments and exclusions.
+Training accepts CLI options for epochs, batch size, learning rate, patience,
+seed, and output paths. Each run saves its configuration and fresh audited
+manifests. See [training configuration and artifacts](docs/training.md).
 
 ## Development
 
-Run the dataset tests:
+Run the complete test suite:
 
 ```powershell
-uv run python -m pytest tests/test_dataset.py -v
-uv run python -m pytest tests/test_data_validation.py -v
+uv run python -m pytest -q
 ```
 
-The three tests cover path resolution, preservation of CSV row order and string
-fields, and conversion to a `DrivingSample`. They do not require real recordings.
-All three were confirmed passing during development. The viewer's A/D boundaries,
-Q/Escape exit, and X-button exit were manually checked on Windows.
-Four additional validation tests cover invalid records, exclusions, deterministic
-manifests, overlap, exact duplicate images, and distribution boundaries. All seven
-tests passed on 2026-10-08.
+All 18 tests passed on 2026-10-09. They cover CSV loading and dataset auditing,
+image preprocessing and decoding, manifest validation, batch alignment, model
+learning, model exports, and evaluation metrics using synthetic data. Ruff and
+strict mypy passed for the six new pipeline modules. A separate real-recording
+smoke run audited all 8,704 examples, trained on 32 examples, and evaluated 16;
+both exports passed prediction agreement checks after reload. This verifies the
+pipeline, not full-dataset model quality. The viewer's A/D boundaries, Q/Escape
+exit, and X-button exit were previously checked manually on Windows.
 
 ## Project structure
 
@@ -267,13 +279,23 @@ src/behavioral_cloning/
     dataset.py          # DrivingSample, CSV reading, path resolution, session loading
     data_validation.py  # Integrity audit, split manifests, steering summaries
     viewer.py           # Sample rendering and OpenCV navigation loop
+    preprocessing.py    # Image decoding, RGB conversion and normalization
+    training_data.py    # Manifest loading and split overlap checks
+    batches.py          # Keras image batches and training-only shuffling
+    model.py            # Small steering CNN and optimizer
+    train.py            # Audit, training, checkpoint selection and exports
+    evaluate.py         # Validation metrics, predictions and plots
 tests/
     test_dataset.py     # Unit tests using synthetic inputs
     test_data_validation.py
+    test_preprocessing.py
+    test_training.py
 configs/dataset.json    # Session assignments and separate exclusion ranges
 docs/dataset.md         # Audit results and preprocessing contract
+docs/training.md        # Training commands, design and verified status
 references/udacity/     # Historical drive.py, video.py, and their license
 data/raw/               # Local recordings (Git-ignored)
+outputs/                # Local audits, models and reports (Git-ignored)
 pyproject.toml          # Project dependencies and development configuration
 uv.lock                 # Dependency lockfile
 ```
@@ -287,7 +309,8 @@ uv.lock                 # Dependency lockfile
   under the local `IMG` folder; Windows-style recorded paths are not yet supported.
 - Missing or unreadable images stop the viewer with an error. Camera images must
   have matching heights and compatible types for horizontal concatenation.
-- Training, augmentation, model saving, and simulator integration remain planned.
+- Full baseline training has not yet run. Augmentation and simulator integration
+  remain planned; training, evaluation and model saving are implemented.
 - Keras is the selected training API. Compatibility between the exported model,
   modern dependencies, and the legacy driving script still needs verification;
   using `.h5` alone does not guarantee the old script will run unchanged.

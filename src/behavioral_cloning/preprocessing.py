@@ -16,6 +16,15 @@ def preprocess_image(
         raise ValueError("Expected image of type uint8")
 
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+    return preprocess_rgb(cast(NDArray[np.uint8], image_rgb))
+
+
+def preprocess_rgb(image_rgb: NDArray[np.uint8]) -> NDArray[np.float32]:
+    """Shared normalization for PIL/simulator RGB and OpenCV training images."""
+    if image_rgb.shape != (160, 320, 3):
+        raise ValueError(f"Expected image shape (160, 320, 3), got {image_rgb.shape}")
+    if image_rgb.dtype != np.uint8:
+        raise ValueError("Expected image of type uint8")
     image_float = image_rgb.astype(np.float32)
     image_float = (image_float / 255.0) - 0.5
 

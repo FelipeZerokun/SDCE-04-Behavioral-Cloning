@@ -131,4 +131,6 @@ exclusions, empty sessions, split overlap, deterministic outputs, duplicate
 detection, and distribution boundaries. Ruff and strict mypy passed for the new
 validation module. The complete suite now has 18 passing tests, including the
 training pipeline. The real-data smoke run re-audited all 8,704 examples
-successfully; full training and held-out baseline assessment remain outstanding.
+successfully. Full training and offline validation evaluation have since completed;
+see [baseline-01](experiments/baseline-01.md). Two baseline simulator attempts have since failed at the first left curve;
+full comparison-model training and driving remain pending.

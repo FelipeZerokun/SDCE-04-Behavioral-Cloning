@@ -17,6 +17,7 @@ class DrivingDataset(keras.utils.PyDataset):  # type: ignore[misc]
         batch_size: int = 32,
         shuffle: bool = False,
         seed: int = 42,
+        flip: bool = False,
     ) -> None:
         super().__init__(workers=1, use_multiprocessing=False, max_queue_size=2)
         if not examples or batch_size < 1:
@@ -24,12 +25,13 @@ class DrivingDataset(keras.utils.PyDataset):  # type: ignore[misc]
         self.examples = examples
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.flip = flip
         self.rng = np.random.default_rng(seed)
-        self.indices = np.arange(len(examples))
+        self.indices = np.arange(len(examples) * (2 if flip else 1))
         self.on_epoch_end()
 
     def __len__(self) -> int:
-        return math.ceil(len(self.examples) / self.batch_size)
+        return math.ceil(len(self.indices) / self.batch_size)
 
     def __getitem__(
         self,
@@ -38,9 +40,12 @@ class DrivingDataset(keras.utils.PyDataset):  # type: ignore[misc]
         if not 0 <= index < len(self):
             raise IndexError(index)
         indices = self.indices[index * self.batch_size : (index + 1) * self.batch_size]
-        samples = [self.examples[int(i)] for i in indices]
+        samples = [self.examples[int(i) % len(self.examples)] for i in indices]
         images = np.stack([load_image(e.image_path) for e in samples])
         labels = np.array([e.steering for e in samples], dtype=np.float32)[:, None]
+        mirrored = indices >= len(self.examples)
+        images[mirrored] = images[mirrored, :, ::-1, :]
+        labels[mirrored] *= -1
         return images, labels
 
     def on_epoch_end(self) -> None:

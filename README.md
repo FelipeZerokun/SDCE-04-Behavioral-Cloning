@@ -12,11 +12,16 @@ that can be run as Python modules.
 **Status:** Dataset loading, the interactive viewer, and dataset validation with
 reproducible split manifests are implemented. All 8,704 current center-image
 examples passed the audit. Training and offline evaluation are implemented and
-smoke-tested. Full baseline training and simulator inference remain outstanding.
+tested. Full baseline-01 training and offline evaluation are complete; live simulator inference works through Gevent. Two baseline attempts departed
+the road at the first left-hand curve; no complete autonomous lap is established.
 See [dataset preparation](docs/dataset.md) for results and the preprocessing contract.
 
-**Next milestone:** Run full baseline training and assess held-out steering
-predictions. See [training instructions](docs/training.md).
+**Next milestone:** The user will train the custom CNN, LeNet-style, and NVIDIA-style
+models sequentially under shared settings, then compare simulator driving.
+All three smoke checks passed. See the [training runbook](docs/comparison-training.md).
+Follow the [learning and experiment plan](docs/project-plan.md),
+[original/current comparison](docs/original-vs-current.md), and
+[experiment index](docs/experiments/README.md).
 
 The active development branch is `modern/keras`. Keras and TensorFlow are locked
 project dependencies. The pipeline saves native `.keras` and full-model `.h5`
@@ -43,14 +48,18 @@ files and verifies their predictions after reload in the current environment.
 The training input is a center-camera image; the target is its
 recorded steering command. Throttle is displayed for inspection but is not
 a training target. Each example uses one image, not a sequence of images.
-Side-camera inputs and corrected steering labels are deferred.
+Side-camera expansion, corrected targets, horizontal flipping, cropping/resizing,
+and an NVIDIA-style model are optional; see [Udacity-style options](docs/udacity-options.md).
+All three architecture smoke runs passed; full comparison training and simulator
+evaluation remain pending. See the [experiment index](docs/experiments/README.md).
 
 1. Collect recordings and inspect them with the viewer (available).
 2. Assign entire sessions to training and validation sets before augmentation
    to reduce leakage between similar neighboring frames (implemented).
 3. Apply the documented preprocessing and train a baseline network (implemented).
 4. Compare training and validation mean squared error (implemented).
-5. Connect the model to the simulator and evaluate autonomous driving (planned).
+5. Connect the model to the simulator and evaluate autonomous driving (connected;
+   two failed baseline attempts documented, successful lap/video still pending).
 
 A low validation error alone does not establish successful driving; the
 model must also keep the vehicle on the road in the simulator.
@@ -228,7 +237,7 @@ selected sample changes.
 ### Train a model
 
 ```powershell
-uv run python -m behavioral_cloning.train --output-dir outputs/baseline-01
+uv run python -m behavioral_cloning.train --output-dir outputs/baseline-02
 ```
 
 See [training instructions](docs/training.md) for smoke mode, settings and outputs.
@@ -309,8 +318,8 @@ uv.lock                 # Dependency lockfile
   under the local `IMG` folder; Windows-style recorded paths are not yet supported.
 - Missing or unreadable images stop the viewer with an error. Camera images must
   have matching heights and compatible types for horizontal concatenation.
-- Full baseline training has not yet run. Augmentation and simulator integration
-  remain planned; training, evaluation and model saving are implemented.
+- Full baseline training and offline evaluation are complete. Autonomous driving
+  is unverified; augmentation and simulator integration remain planned.
 - Keras is the selected training API. Compatibility between the exported model,
   modern dependencies, and the legacy driving script still needs verification;
   using `.h5` alone does not guarantee the old script will run unchanged.

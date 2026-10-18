@@ -1,7 +1,14 @@
 # Single-image steering baseline
 
-The training pipeline is implemented. A small real-data smoke run has passed;
-full baseline training and autonomous simulator driving remain to be performed.
+The training pipeline, smoke run, and full baseline-01 training are complete.
+See the [baseline report](experiments/baseline-01.md) for measured results and the
+[project plan](project-plan.md) for the learning sequence and next experiments.
+Live inference is working; two autonomous attempts failed at the first left-hand
+curve. Camera frames are saved; a complete lap and video remain unestablished.
+
+For the planned three-model comparison, use the [sequential full-training
+runbook](comparison-training.md). All three smoke checks passed; the user will
+launch full runs manually. The examples below describe the default baseline.
 
 ## Run
 
@@ -9,8 +16,11 @@ From the repository root in PowerShell:
 
 ```powershell
 uv sync --locked
-uv run python -m behavioral_cloning.train --output-dir outputs/baseline-01
+uv run python -m behavioral_cloning.train --output-dir outputs/baseline-02
 ```
+
+The example uses baseline-02 because baseline-01 already exists. Do not run it merely
+to follow the documentation; the next step is inspecting the saved baseline driving failures.
 
 Each run requires a new output directory to avoid overwriting previous models.
 The command audits all recordings and creates fresh split manifests inside the
@@ -38,7 +48,10 @@ The standalone evaluator can also load `model.h5`. It expects the same external
 preprocessing contract as the training command. Evaluation output files are
 replaced when reusing an evaluation directory.
 
-## Design and learning order
+## Module reference
+
+For interactive learning, follow `train.py` in execution order as described in the
+[project plan](project-plan.md). The list below is a module reference.
 
 1. `preprocessing.py`: OpenCV decoding, BGR-to-RGB conversion, float32 conversion,
    and normalization by `pixel / 255.0 - 0.5`.
@@ -50,8 +63,11 @@ replaced when reusing an evaluation directory.
 5. `train.py`: audit, seed, train, select checkpoint, export, and evaluate.
 6. `evaluate.py`: ordered predictions, metrics, and plots.
 
-The model receives full 160 x 320 RGB images, already normalized. There is no
-additional normalization layer, crop, resize, augmentation, or resampling.
+By default the model receives full 160 x 320 RGB images, already normalized,
+without crop, resize or augmentation. Optional Udacity-style features are now
+available; see [configuration and collection guide](udacity-options.md).
+Crop/resize live inside saved models; training-only flips and side-camera
+expansion never affect validation membership.
 Targets are recorded steering commands, unchanged. Validation is never shuffled.
 TensorFlow is the default Keras backend, using CPU on native Windows. GPU setup
 is a separate environment decision. Dependencies and exact versions are locked

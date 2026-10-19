@@ -158,3 +158,11 @@ re-encoding can change them slightly; actual speed history and live commands can
 be recovered exactly. Compare relevant training/validation examples, then state one
 hypothesis and its tradeoffs. Cropping, flipping, targeted data, side cameras, and
 architecture changes remain candidates, not approved training jobs.
+
+## Follow-up (2026-10-19)
+
+Later checks found 465 single frames and one identical pair in the Eventlet run,
+versus 154 identical triplets, 6 pairs and 10 singles in the Gevent run. The backend
+association is real in these files; causality remains unresolved. Later three-model
+training/driving and rollback results supersede the historical next-action text
+above; see [combined results](three-model-results.md). Baseline artifacts unchanged.

@@ -1,6 +1,11 @@
 # Learning and experiment plan
 
-Updated 2026-10-18. Goal: understand the implementation well enough to design
+**Project state: pending.** Successful autonomous laps have been reported with the
+custom CNN. Further data collection is needed for the next improvement phase,
+including targeted tight-turn/recovery examples and planned advanced-track data.
+Improvement from these additions remains to be tested. No new training is queued.
+
+Updated 2026-10-19. Goal: understand the implementation well enough to design
 similar projects independently, and demonstrate one complete autonomous lap in
 the simulator with a documented model, conditions, results, and video.
 This goal concerns this simulator and track; it does not establish real-world autonomy.
@@ -20,12 +25,15 @@ This goal concerns this simulator and track; it does not establish real-world au
 - [x] Replace deprecated Eventlet with Gevent and verify the live connection.
 - [x] Preserve camera frames and operator reports from two failed baseline attempts.
 - [ ] Inspect the first left-curve departure; distinguish pipeline/controller issues from model weakness.
-- [ ] Capture simulator-window video and complete per-attempt conditions/telemetry.
+- [ ] Confirm capture type of the available video and complete per-attempt metadata.
 - [x] Implement optional flip, audited side cameras, saved crop/resize, and NVIDIA-style architecture.
 - [x] Select the three-model comparison: custom CNN, LeNet-style, NVIDIA-style under shared settings.
 - [x] Complete the three authorized one-epoch smoke checks and record their outcomes (all passed).
-- [ ] User to run the three full trainings sequentially using [the runbook](comparison-training.md), then evaluate offline and in the simulator.
-- [ ] Record a complete autonomous lap and document the final model and limitations.
+- [x] Complete three full trainings and offline/driving comparison; see [results](experiments/three-model-results.md).
+- [x] Investigate repeated images, accelerate inference, and return to Eventlet for comparison.
+- [x] Record operator-reported custom CNN lap completion under both backends.
+- [ ] Associate the available video with its model/run and document its durable location.
+- [ ] Link the reported lap completion to the available video and final checkpoint.
 
 The baseline is already trained; do not retrain or replace it just to start this
 plan. Documentation and inference integration can be added around it. Proposed
@@ -59,11 +67,15 @@ step rather than restarting the explanation.
 
 ## Baseline driving milestone
 
-Current status: two attempts on simulator-windows-64 departed to the right during
-the first left-hand curve. Gevent is retained; no model changes or new training
-are selected. See the [baseline report](experiments/baseline-01.md) for the migration,
-conditions, evidence limitations, and next inspection step. The learning bookmark
-above belongs to the separate code-review chat.
+Current checkpoint: custom CNN completed two reported autonomous laps before a
+later failure and another full lap in the Eventlet retest. LeNet and NVIDIA retain
+tight-curve failures. Video is reported available but not yet linked or inspected.
+Current backend is Eventlet; switching back did not resolve model driving failures.
+See [results and investigation](experiments/three-model-results.md).
+Work is paused at the user's request. When resuming, audit saved-frame/label steering
+errors before selecting targeted recovery or advanced-track data collection. No
+advanced-track data has been used; improvement from more data is unproven. No new
+training is queued. The learning bookmark belongs to the separate review chat.
 
 The legacy `references/udacity/drive.py` passes raw RGB pixels to the model.
 The current model requires normalized float32 RGB inputs. The copied active drive.py now applies the same normalization exactly once and respects decoder color order;
@@ -138,7 +150,7 @@ and metric calculations; they cannot prove autonomous driving success.
 Each implemented experiment must persist its actual preprocessing, augmentation,
 architecture, training, dataset, and inference settings. The CLI now supports optional flip, camera expansion/corrections, crop/resize,
 and architecture selection; see [Udacity-style options](udacity-options.md).
-These are implemented capabilities, not completed training experiments. Keep raw data and baseline artifacts unchanged.
+These capabilities have now been used in the completed three-model comparison. Keep raw data and baseline artifacts unchanged.
 
 Commit small experiment reports and this index; store models/videos in separate
 run directories or durable external storage with links and hashes. `outputs/` is

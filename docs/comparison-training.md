@@ -1,8 +1,28 @@
 # Three-model training and driving comparison
 
-Status as of 2026-10-18: implementation and all three one-epoch smoke checks
-passed. Full comparison training has not started in this chat. The user will run
-the trainings manually, one at a time. Codex must not start them automatically.
+## Eventlet diagnostic rollback (2026-10-19)
+
+All three full training runs have now completed. Driving remains under evaluation.
+At the user's request, drive.py uses Eventlet again for a backend comparison.
+Eventlet 0.41.2 is installed and locked; Gevent dependencies remain available.
+The direct model call, external normalization, target speed 9, and PI controller
+are unchanged from the latest Gevent diagnostic. Eventlet's deprecation warning
+is expected. This rollback does not yet establish the cause of repeated telemetry.
+
+The original Eventlet recording contained 467 frames with one consecutive identical
+pair; the first Gevent recording contained 484 frames, including 154 identical
+triplets. These were different runs, not a controlled backend benchmark.
+Logs now include backend/model/settings, connection IDs and active counts,
+per-connection sequence and image-repeat counts, callback-entry intervals, speed,
+steering, throttle, and inference/callback timings. Timings do not measure simulator
+capture age or command delivery, and callback timing excludes the diagnostic print.
+Use fresh output directories and preserve both successful and failed attempts.
+
+Status as of 2026-10-19: all three full trainings and driving comparisons completed.
+See [results and lessons](experiments/three-model-results.md). Commands below are
+reproduction instructions; existing run directories must not be overwritten.
+No new training is queued. The user reports a good video; its path and run metadata
+are pending. Further data collection is a future hypothesis, not a proven improvement.
 
 ## Fixed comparison settings
 

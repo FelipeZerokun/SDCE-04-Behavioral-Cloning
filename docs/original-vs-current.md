@@ -10,8 +10,10 @@ Use it alongside the [project plan](project-plan.md), one topic at a time.
 The historical comparison below describes baseline-01. Optional horizontal flips,
 audited side cameras, model-embedded crop/resize, and the supplied-diagram
 NVIDIA-style variant are now implemented. The baseline defaults are unchanged.
-Three one-epoch architecture smoke checks passed; full comparison results remain
-pending. See [Udacity-style options](udacity-options.md) and
+All three full training and simulator comparisons have now completed. See the
+[2026-10-19 results](experiments/three-model-results.md): custom has reported lap
+completion; NVIDIA has best validation metrics but tight-curve failures persist.
+Current inference uses Eventlet again after backend diagnostics. See [Udacity-style options](udacity-options.md) and
 the [verification record](experiments/udacity-options.md) for current capabilities.
 
 ## Original learning progression
@@ -58,7 +60,7 @@ each initial choice, so we cannot assign a measured gain to each one.
 | Recovery | Add side cameras with estimated corrections, later more demonstrations | Use center images from actual recovery sessions with recorded steering | Side cameras remain optional, with audited images and justified corrections |
 | Field of view | Add cropping | Keep full 160 x 320 images for the reference run | Inspect candidate crop on varied scenes, then compare a crop-only run |
 | Evaluation | Inspect losses and iterate in simulator | Save offline metrics, best checkpoint, and reload checks from the first run | Two failed driving attempts now documented; complete lap/video still missing |
-| Engineering | Much of the solution in one script | Modules, typed records, integrity checks, fixed session splits, tests, run artifacts | Copied drive.py adapted and connected via Gevent; broader tests/settings remain |
+| Engineering | Much of the solution in one script | Modules, typed records, integrity checks, fixed session splits, tests, run artifacts | Copied drive.py adapted; Gevent comparison followed by Eventlet rollback; see current results |
 
 Recorded recovery images contain driver actions from actual off-center positions.
 Side-camera augmentation instead estimates the action appropriate to a displaced
@@ -252,8 +254,9 @@ the same essential requirement; modularity itself does not improve predictions.
 - Original: course process inspects loss and simulator driving; the pasted script
   itself has no saved offline breakdown or driving evaluation implementation.
 - Current: best-checkpoint predictions, MSE/MAE, zero predictor comparison, session
-  and steering bins, scatterplot, and largest-error images. The copied drive.py now supports live inference through Gevent; two attempts
-  departed at the first left-hand curve (see baseline report).
+  and steering bins, scatterplot, and largest-error images. The copied drive.py supports live inference, currently via Eventlet after a Gevent
+  comparison. Original baseline attempts failed; the later custom CNN completed
+  reported laps. See the current results report.
 - Classification: evaluation matching the goal is essential. Detailed diagnostics
   are safeguards; exact plots and bin thresholds are choices.
 - Tradeoff/transfer: aggregate MSE can hide turn errors or reward near-zero predictions.

@@ -1,25 +1,28 @@
 import argparse
 import base64
+import hashlib
 import os
 from datetime import UTC, datetime
 from io import BytesIO
+from time import perf_counter
 
 import h5py
+import eventlet
+import eventlet.wsgi
 import numpy as np
 import socketio
 from flask import Flask
-from gevent import pywsgi
-from geventwebsocket.handler import WebSocketHandler
 from keras import __version__ as keras_version
 from keras.models import load_model
 from PIL import Image
 
 from behavioral_cloning.preprocessing import preprocess_rgb
 
-sio = socketio.Server(async_mode="gevent") #Replaced -> sio = socketio.Server()
+sio = socketio.Server(async_mode="eventlet")
 app = Flask(__name__)
 model = None
-prev_image_array = None
+diagnostics: dict[str, tuple[str, float, int, int]] = {}
+connections: set[str] = set()
 
 
 class SimplePIController:
@@ -51,6 +54,7 @@ controller.set_desired(set_speed)
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
+        callback_start = perf_counter()
         # The current steering angle of the car
         steering_angle = data["steering_angle"]
         # The current throttle of the car
@@ -59,22 +63,50 @@ def telemetry(sid, data):
         speed = data["speed"]
         # The current image from the center camera of the car
         imgString = data["image"]
-        image = Image.open(BytesIO(base64.b64decode(imgString))).convert("RGB")
+
+        image_bytes = base64.b64decode(imgString)
+        image_hash = hashlib.sha256(image_bytes).hexdigest()[:16]
+        previous_hash, previous_time, previous_repeat, previous_count = diagnostics.get(
+            sid, ("", callback_start, 0, 0)
+        )
+        repeat = previous_repeat + 1 if image_hash == previous_hash else 1
+        sequence = previous_count + 1
+        interval_ms = (callback_start - previous_time) * 1000
+        diagnostics[sid] = (image_hash, callback_start, repeat, sequence)
+        image = Image.open(BytesIO(image_bytes)).convert("RGB")
         image_array = preprocess_rgb(np.asarray(image, dtype=np.uint8))
 
-        prediction = model.predict(image_array[None, ...], verbose=0)
+        predict_start = perf_counter()
+        prediction = model(image_array[None, ...], training=False).numpy()
+        predict_ms = (perf_counter() - predict_start) * 1000
+
         steering_angle = float(prediction[0, 0])
 
         throttle = float(np.clip(controller.update(float(speed)), -1.0, 1.0))
 
-        print(steering_angle, throttle)
         send_control(steering_angle, throttle)
+        emit_return_ms = (perf_counter() - callback_start) * 1000
 
         # save frame
         if args.image_folder != '':
             timestamp = datetime.now(UTC).strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
             image_filename = os.path.join(args.image_folder, timestamp)
             image.save('{}.jpg'.format(image_filename))
+
+        callback_ms = (perf_counter() - callback_start) * 1000
+        print(
+            f"DIAG t={callback_start:.6f} "
+            f"sid={sid} seq={sequence} repeat={repeat} "
+            f"interval_ms={interval_ms:.2f} "
+            f"image={image_hash} "
+            f"speed={float(speed):.3f} "
+            f"steering={steering_angle:.6f} "
+            f"throttle={throttle:.6f} "
+            f"predict_ms={predict_ms:.2f} "
+            f"emit_return_ms={emit_return_ms:.2f} "
+            f"callback_ms={callback_ms:.2f}",
+            flush=True,
+        )
     else:
         # NOTE: DON'T EDIT THIS.
         sio.emit('manual', data={}, skip_sid=True)
@@ -82,8 +114,17 @@ def telemetry(sid, data):
 
 @sio.on('connect')
 def connect(sid, environ):
-    print("connect ", sid)
+    connections.add(sid)
+    diagnostics.pop(sid, None)
+    print(f"CONNECT sid={sid} active={len(connections)}", flush=True)
     send_control(0, 0)
+
+
+@sio.on('disconnect')
+def disconnect(sid):
+    connections.discard(sid)
+    diagnostics.pop(sid, None)
+    print(f"DISCONNECT sid={sid} active={len(connections)}", flush=True)
 
 
 def send_control(steering_angle, throttle):
@@ -139,11 +180,11 @@ if __name__ == '__main__':
 
     app = socketio.WSGIApp(sio, app)
 
-    server = pywsgi.WSGIServer(
-        ("127.0.0.1", 4567),
-        app,
-        handler_class=WebSocketHandler,
+    print(
+        f"RUN backend={sio.async_mode} model={args.model} target_speed={set_speed} "
+        f"Kp={controller.Kp} Ki={controller.Ki} inference=direct "
+        f"recording={args.image_folder or 'disabled'}",
+        flush=True,
     )
-
     print("Listening for the simulator on 127.0.0.1:4567", flush=True)
-    server.serve_forever()
+    eventlet.wsgi.server(eventlet.listen(("127.0.0.1", 4567)), app)

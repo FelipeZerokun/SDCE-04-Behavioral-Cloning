@@ -1,4 +1,9 @@
-# Behavioral Cloning — Python
+# Behavioral Cloning â€” Python
+
+**Project state: pending.** Successful autonomous laps have been reported with the
+custom CNN. Further data collection is needed for the next improvement phase,
+including targeted tight-turn/recovery examples and planned advanced-track data.
+Improvement from these additions remains to be tested. No new training is queued.
 
 A behavioral cloning project in development, with the goal of learning
 steering commands from recorded camera images and driving in the Udacity simulator.
@@ -9,16 +14,16 @@ This repository modernizes the Behavioral Cloning project from Udacity's
 Self-Driving Car Engineer Nanodegree as a typed, tested Python package
 that can be run as Python modules.
 
-**Status:** Dataset loading, the interactive viewer, and dataset validation with
-reproducible split manifests are implemented. All 8,704 current center-image
-examples passed the audit. Training and offline evaluation are implemented and
-tested. Full baseline-01 training and offline evaluation are complete; live simulator inference works through Gevent. Two baseline attempts departed
-the road at the first left-hand curve; no complete autonomous lap is established.
-See [dataset preparation](docs/dataset.md) for results and the preprocessing contract.
+**Status:** All three architectures are trained and driving-tested. The custom CNN
+completed autonomous laps according to operator reports; LeNet and NVIDIA still
+fail at tight curves. NVIDIA has the lowest validation error. Eventlet is currently
+used after a Gevent comparison; faster direct inference improved timing but did
+not eliminate failures. A good driving video is reported available; its exact
+model/run association and location remain to be documented.
+See [results and lessons](docs/experiments/three-model-results.md).
 
-**Next milestone:** The user will train the custom CNN, LeNet-style, and NVIDIA-style
-models sequentially under shared settings, then compare simulator driving.
-All three smoke checks passed. See the [training runbook](docs/comparison-training.md).
+**Current checkpoint:** Work paused at the user's request. Future work is a steering
+error audit followed by a selected data experiment, not automatic retraining.
 Follow the [learning and experiment plan](docs/project-plan.md),
 [original/current comparison](docs/original-vs-current.md), and
 [experiment index](docs/experiments/README.md).
@@ -50,8 +55,7 @@ recorded steering command. Throttle is displayed for inspection but is not
 a training target. Each example uses one image, not a sequence of images.
 Side-camera expansion, corrected targets, horizontal flipping, cropping/resizing,
 and an NVIDIA-style model are optional; see [Udacity-style options](docs/udacity-options.md).
-All three architecture smoke runs passed; full comparison training and simulator
-evaluation remain pending. See the [experiment index](docs/experiments/README.md).
+All three full training runs and initial-track simulator evaluations are complete. See the [experiment index](docs/experiments/README.md).
 
 1. Collect recordings and inspect them with the viewer (available).
 2. Assign entire sessions to training and validation sets before augmentation
@@ -59,7 +63,7 @@ evaluation remain pending. See the [experiment index](docs/experiments/README.md
 3. Apply the documented preprocessing and train a baseline network (implemented).
 4. Compare training and validation mean squared error (implemented).
 5. Connect the model to the simulator and evaluate autonomous driving (connected;
-   two failed baseline attempts documented, successful lap/video still pending).
+   custom CNN lap completion reported; video available but metadata pending).
 
 A low validation error alone does not establish successful driving; the
 model must also keep the vehicle on the road in the simulator.
@@ -160,7 +164,7 @@ integrity, not driving correctness.
 The simulator version has not yet been documented.
 
 For the single-image baseline, recording interruptions do not invalidate individual
-image–steering pairs. Keep the existing folders and original recordings intact.
+imageâ€“steering pairs. Keep the existing folders and original recordings intact.
 Any future sequence-based model would need verified continuous-segment boundaries
 so that input windows cannot cross interruptions; those boundaries have not been
 identified. Separate directories per continuous take are recommended for future
@@ -250,8 +254,16 @@ uv run python -m behavioral_cloning.evaluate outputs/baseline-01/model.keras --m
 
 ### Drive in the simulator
 
-Not implemented yet. The scripts under `references/udacity/` are historical
-references, not the current package's inference implementation.
+Run the current adapter with an existing checkpoint and a new recording directory:
+
+```powershell
+.venv\Scripts\python.exe -u -m behavioral_cloning.drive outputs/comparison-custom-01/model.h5 outputs/custom-eventlet-test-02
+```
+
+Current settings: Eventlet, target speed 9, direct model inference and diagnostic
+logging. Use the same track/start/direction for comparisons, restart the process
+between attempts, and record simulator-window video separately. See the
+[runbook](docs/comparison-training.md). Historical reference scripts remain unchanged.
 
 ## Configuration
 
@@ -291,7 +303,9 @@ src/behavioral_cloning/
     preprocessing.py    # Image decoding, RGB conversion and normalization
     training_data.py    # Manifest loading and split overlap checks
     batches.py          # Keras image batches and training-only shuffling
-    model.py            # Small steering CNN and optimizer
+    model.py            # Custom, LeNet-style and NVIDIA-style architectures
+    drive.py            # Simulator adapter, recording and runtime diagnostics
+    provenance.py       # Saved code/configuration identities
     train.py            # Audit, training, checkpoint selection and exports
     evaluate.py         # Validation metrics, predictions and plots
 tests/
@@ -318,11 +332,11 @@ uv.lock                 # Dependency lockfile
   under the local `IMG` folder; Windows-style recorded paths are not yet supported.
 - Missing or unreadable images stop the viewer with an error. Camera images must
   have matching heights and compatible types for horizontal concatenation.
-- Full baseline training and offline evaluation are complete. Autonomous driving
-  is unverified; augmentation and simulator integration remain planned.
-- Keras is the selected training API. Compatibility between the exported model,
-  modern dependencies, and the legacy driving script still needs verification;
-  using `.h5` alone does not guarantee the old script will run unchanged.
+- Initial-track lap completion is operator-reported for custom CNN; consistent
+  reliability and advanced-track performance are not established.
+- Video metadata is pending. LeNet/NVIDIA tight-curve failures remain unresolved.
+- Eventlet is deprecated and retained for this investigation. Repeated images were
+  associated with Gevent runs, but the root cause is not established.
 
 ## Legacy project and attribution
 

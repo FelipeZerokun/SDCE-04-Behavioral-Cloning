@@ -6,7 +6,7 @@ See the [baseline report](experiments/baseline-01.md) for measured results and t
 Live inference is working; two autonomous attempts failed at the first left-hand
 curve. Camera frames are saved; a complete lap and video remain unestablished.
 
-For the planned three-model comparison, use the [sequential full-training
+For reproducing the completed three-model comparison, use the [sequential full-training
 runbook](comparison-training.md). All three smoke checks passed; the user will
 launch full runs manually. The examples below describe the default baseline.
 

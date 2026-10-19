@@ -73,6 +73,7 @@ name = "behavioral-cloning"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "eventlet" },
     { name = "flask" },
     { name = "gevent" },
     { name = "gevent-websocket" },
@@ -95,6 +96,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "eventlet", specifier = ">=0.41.2" },
     { name = "flask", specifier = ">=3.1.3" },
     { name = "gevent", specifier = ">=26.9.0" },
     { name = "gevent-websocket", specifier = ">=0.10.1" },
@@ -235,6 +237,28 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a9/95/a3dbbb5028f35eafb79008e7522a75244477d2838f38cbb722248dabc2a8/cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c", size = 7615, upload-time = "2023-10-07T05:32:18.335Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30", size = 8321, upload-time = "2023-10-07T05:32:16.783Z" },
+]
+
+[[package]]
+name = "dnspython"
+version = "2.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/4a/50822184bd67cc6493f0fb6a880749158fcd31ab3fa07409acfd91f9fc85/dnspython-2.9.0.tar.gz", hash = "sha256:b44dc6b18f07a8b1c56676a19fbfdb5209415b046a9cece286baafa87ff3f7f1", size = 423560, upload-time = "2026-10-09T00:07:24.352Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/02/cdcc9b7c051786a103c3b09e1003a82fa0c66bcb91ffbdabcfbf7b4163b9/dnspython-2.9.0-py3-none-any.whl", hash = "sha256:9a4aedb833c3c1b49214d04d44d3032ab7a9135f7c1d29a549b4ff78fd82fda9", size = 354822, upload-time = "2026-10-09T00:07:22.622Z" },
+]
+
+[[package]]
+name = "eventlet"
+version = "0.41.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dnspython" },
+    { name = "greenlet" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/eb/e8/6a3a23a3b85ed129b21309c6eca873d833855e63879cd72b9dac20d9b76a/eventlet-0.41.2.tar.gz", hash = "sha256:721b86b77fca33a735598292022ac6feef99747bf48f52defdada6b572acd5af", size = 566270, upload-time = "2026-08-14T07:51:00.331Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/75/9681fa59c4b27d9e34e8be682d2fff3f5be87bf6552477f9a5d395a068c3/eventlet-0.41.2-py3-none-any.whl", hash = "sha256:6cae50e67fe6ae8bb7013e7fd4d8e0d0d20aeb9b3259b93f023c93eb6749631f", size = 364641, upload-time = "2026-08-14T07:50:58.838Z" },
 ]
 
 [[package]]

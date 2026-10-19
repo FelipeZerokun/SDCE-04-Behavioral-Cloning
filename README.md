@@ -1,4 +1,4 @@
-# Behavioral Cloning â€” Python
+# Behavioral Cloning - Python
 
 **Project state: pending.** Successful autonomous laps have been reported with the
 custom CNN. Further data collection is needed for the next improvement phase,
@@ -164,7 +164,7 @@ integrity, not driving correctness.
 The simulator version has not yet been documented.
 
 For the single-image baseline, recording interruptions do not invalidate individual
-imageâ€“steering pairs. Keep the existing folders and original recordings intact.
+image-steering pairs. Keep the existing folders and original recordings intact.
 Any future sequence-based model would need verified continuous-segment boundaries
 so that input windows cannot cross interruptions; those boundaries have not been
 identified. Separate directories per continuous take are recommended for future
